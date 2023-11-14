@@ -24,7 +24,7 @@ class _MywaitBodyState extends State<MywaitBody> {
       body: Container(
           child: Stack(children: [
         Image.asset(
-          'assets/backimg.png',
+          'assets/background_1.png',
           fit: BoxFit.cover, //지정된 영역을 꽉 채운다
           width: double.infinity, //가로 너비 채우기
           height: double.infinity,
@@ -32,7 +32,7 @@ class _MywaitBodyState extends State<MywaitBody> {
         Padding(
           padding: const EdgeInsets.only(top: 0),
           child: Center(
-            child: Column(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
@@ -43,10 +43,13 @@ class _MywaitBodyState extends State<MywaitBody> {
                               builder: (context) => live_home_screen()));
                     },
                     icon: SvgPicture.asset(
-                      'assets/logo/waitlogo_02.svg',
-                      width: 350.0,
-                      height: 350.0,
+                      'assets/logo/cctv.svg',
+                      width: 120.0,
+                      height: 120.0,
                     )),
+                SizedBox(
+                  width: 300,
+                ),
                 IconButton(
                     onPressed: () {
                       Navigator.push(
@@ -55,9 +58,9 @@ class _MywaitBodyState extends State<MywaitBody> {
                               builder: (context) => video_home_screen()));
                     },
                     icon: SvgPicture.asset(
-                      'assets/logo/waitlogo_02.svg',
-                      width: 350.0,
-                      height: 350.0,
+                      'assets/logo/video.svg',
+                      width: 150.0,
+                      height: 150.0,
                     ))
               ],
             ),
