@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:frontend/home_screen.dart';
+import 'package:frontend/live_home_screen.dart';
+import 'package:frontend/video_home_screen.dart';
 
 class MywaitBody extends StatefulWidget {
   @override
@@ -39,7 +40,19 @@ class _MywaitBodyState extends State<MywaitBody> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => home_screen()));
+                              builder: (context) => live_home_screen()));
+                    },
+                    icon: SvgPicture.asset(
+                      'assets/logo/waitlogo_02.svg',
+                      width: 350.0,
+                      height: 350.0,
+                    )),
+                IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => video_home_screen()));
                     },
                     icon: SvgPicture.asset(
                       'assets/logo/waitlogo_02.svg',
