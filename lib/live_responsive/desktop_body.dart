@@ -47,8 +47,23 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                           fit: BoxFit.cover,
                           opacity: 150)),
                   child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        Container(
+                          // 감지내역 밑에 밑줄 언더라인.
+                          decoration: BoxDecoration(
+                              border: Border(
+                                  bottom: BorderSide(color: Colors.white))),
+                          padding: EdgeInsets.all(8.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "CCTV",
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              ]),
+                        ),
                         Container(
                           child: Mjpeg(
                             isLive: true,
@@ -61,6 +76,8 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                             stream: 'http://127.0.0.1:5000/video',
                           ),
                         ),
+                        // symmetric을 활용하기위해 맨 맡이 컨테이너를 둬서 정렬 활용.
+                        Container(),
                       ]),
                 ),
               ),
