@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_mjpeg/flutter_mjpeg.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 class MyDesktopBody extends StatefulWidget {
   @override
@@ -7,6 +9,7 @@ class MyDesktopBody extends StatefulWidget {
 }
 
 class _MyDesktopBodyState extends State<MyDesktopBody> {
+  @override
   void initState() {
     super.initState();
   }
@@ -43,10 +46,22 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                               'assets/image/microdust_inform_background_black.jpg'),
                           fit: BoxFit.cover,
                           opacity: 150)),
-                  child: Column(children: [
-                    // 비디오를 넣어야함.
-                    Container(),
-                  ]),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Mjpeg(
+                            isLive: true,
+                            error: (context, error, stack) {
+                              print(error);
+                              print(stack);
+                              return Text(error.toString(),
+                                  style: TextStyle(color: Colors.red));
+                            },
+                            stream: 'http://127.0.0.1:5000/video',
+                          ),
+                        ),
+                      ]),
                 ),
               ),
               Expanded(

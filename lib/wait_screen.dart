@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/live_home_screen.dart';
 import 'package:frontend/video_home_screen.dart';
+import 'package:frontend/live_responsive/video.dart';
 
 class MywaitBody extends StatefulWidget {
   @override
