@@ -1,7 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_mjpeg/flutter_mjpeg.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class MyDesktopBody extends StatefulWidget {
   @override
@@ -9,13 +9,39 @@ class MyDesktopBody extends StatefulWidget {
 }
 
 class _MyDesktopBodyState extends State<MyDesktopBody> {
+  ScrollController _scrollController = ScrollController();
+  late io.Socket socket;
+  List<String> dataList = [];
+
   @override
   void initState() {
     super.initState();
+
+    socket = io.io('http://127.0.0.1:5000', <String, dynamic>{
+      'transports': ['websocket'],
+    });
+
+    socket.onConnect((_) {
+      // 디버깅
+      print('Connected');
+      socket.emit('get_data');
+    });
+
+    socket.on('send_data', (counts_dict) {
+      // 디버깅
+      print('Received data: $counts_dict');
+
+      setState(() {
+        dataList.add(counts_dict.toString());
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -152,7 +178,20 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                                 ]),
                           ),
                           // 이 부분을 기점으로 감지내역의 데이터를 넣을 리스트뷰를 넣어야한다. Container() 안에,
-                          Container(),
+                          Container(
+                            constraints: BoxConstraints(maxHeight: 400),
+                            child: ListView.builder(
+                                controller: _scrollController,
+                                itemCount: dataList.length,
+                                itemBuilder: (context, index) {
+                                  return ListTile(
+                                    title: Text(
+                                      dataList[index],
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  );
+                                }),
+                          ),
                         ],
                       ),
                     ),

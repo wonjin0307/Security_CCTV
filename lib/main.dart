@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/wait_screen.dart';
 
-void main() {
+void main() async {
   runApp(const MyApp());
 }
 
