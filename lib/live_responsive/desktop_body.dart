@@ -11,7 +11,7 @@ class MyDesktopBody extends StatefulWidget {
 class _MyDesktopBodyState extends State<MyDesktopBody> {
   ScrollController _scrollController = ScrollController();
   late io.Socket socket;
-  List<String> dataList = ["SSC"];
+  List<String> dataList = ["감지내역이 없습니다."];
 
   @override
   void initState() {
@@ -65,13 +65,7 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                 child: Container(
                   width: 1100,
-                  decoration: BoxDecoration(
-                      // borderRadius: BorderRadius.circular(20),
-                      image: DecorationImage(
-                          image: AssetImage(
-                              'assets/image/microdust_inform_background_black.jpg'),
-                          fit: BoxFit.cover,
-                          opacity: 150)),
+                  color: Colors.black.withOpacity(0.5),
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -91,17 +85,21 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                               ]),
                         ),
                         Container(
-                          child: Mjpeg(
-                            isLive: true,
-                            error: (context, error, stack) {
-                              print(error);
-                              print(stack);
-                              return Text(error.toString(),
-                                  style: TextStyle(color: Colors.red));
-                            },
-                            stream: 'http://127.0.0.1:5000/video',
-                          ),
-                        ),
+                            child: Column(
+                          children: [
+                            Text(''),
+                            Mjpeg(
+                              isLive: true,
+                              error: (context, error, stack) {
+                                print(error);
+                                print(stack);
+                                return Text(error.toString(),
+                                    style: TextStyle(color: Colors.red));
+                              },
+                              stream: 'http://127.0.0.1:5000/video',
+                            ),
+                          ],
+                        )),
                         // symmetric을 활용하기위해 맨 맡이 컨테이너를 둬서 정렬 활용.
                         Container(),
                       ]),
@@ -113,15 +111,8 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                       left: 8, right: 8, bottom: 8, top: 16),
                   children: <Widget>[
                     Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        image: DecorationImage(
-                            image: AssetImage(
-                                'assets/image/microdust_inform_background_black.jpg'),
-                            fit: BoxFit.cover,
-                            opacity: 150),
-                      ),
-                      height: 600,
+                      color: Colors.black.withOpacity(0.5),
+                      height: 960,
                       child: Column(
                         children: [
                           Container(
@@ -141,7 +132,7 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                           ),
                           // 이 부분을 기점으로 감지내역의 데이터를 넣을 리스트뷰를 넣어야한다. Container() 안에,
                           Container(
-                            constraints: BoxConstraints(maxHeight: 500),
+                            constraints: BoxConstraints(maxHeight: 900),
                             child: ListView.builder(
                                 controller: _scrollController,
                                 itemCount: dataList.length,

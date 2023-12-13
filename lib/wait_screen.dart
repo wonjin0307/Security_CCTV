@@ -36,33 +36,55 @@ class _MywaitBodyState extends State<MywaitBody> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => live_home_screen()));
-                    },
-                    icon: SvgPicture.asset(
-                      'assets/logo/cctv.svg',
-                      width: 120.0,
-                      height: 120.0,
-                    )),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => live_home_screen()));
+                        },
+                        icon: SvgPicture.asset(
+                          'assets/logo/cctv.svg',
+                          width: 80.0,
+                          height: 80.0,
+                          color: Colors.white60,
+                        )),
+                    Text(
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                        "CCTV"),
+                  ],
+                ),
                 SizedBox(
                   width: 300,
                 ),
-                IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => video_home_screen()));
-                    },
-                    icon: SvgPicture.asset(
-                      'assets/logo/video.svg',
-                      width: 150.0,
-                      height: 150.0,
-                    ))
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => video_home_screen()));
+                        },
+                        icon: SvgPicture.asset(
+                          'assets/logo/video.svg',
+                          width: 80.0,
+                          height: 80.0,
+                          color: Colors.white60,
+                        )),
+                    Text(
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                        "VIDEO"),
+                  ],
+                ),
               ],
             ),
           ),

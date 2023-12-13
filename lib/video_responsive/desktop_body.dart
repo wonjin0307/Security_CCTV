@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/svg.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
@@ -15,6 +17,11 @@ class MyDesktopBody extends StatefulWidget {
 }
 
 class _MyDesktopBodyState extends State<MyDesktopBody> {
+  ScrollController _scrollController = ScrollController();
+  List<String> resultList = [];
+  bool isLoading = false;
+  String resultMessage = '';
+
   File? _selectedVideo;
   late VideoPlayerController _videoPlayerController;
 
@@ -38,6 +45,11 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
   }
 
   Future<void> _uploadVideo(File videoFile) async {
+    setState(() {
+      isLoading = true;
+      resultList = [];
+    });
+
     try {
       var url = Uri.parse('http://127.0.0.1:5000/upload');
 
@@ -50,9 +62,20 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
       );
 
       var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
 
+      setState(() {
+        isLoading = false;
+        resultMessage =
+            response.statusCode == 200 ? '디택션이 완성되었습니다.' : '디택션이 아직 완성되지않았습니다.';
+      });
       if (response.statusCode == 200) {
         print('동영상 업로드 성공');
+        List<dynamic> jsonMap = jsonDecode(responseBody);
+        setState(() {
+          resultList.add(jsonMap.toString());
+          print(resultList);
+        });
       } else {
         print('동영상 업로드 실패: ${response.reasonPhrase}');
       }
@@ -92,7 +115,6 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
       type: FileType.custom,
       allowedExtensions: ['mp4', 'mkv', 'avi'],
     );
-
     if (result != null) {
       File selectedVideo = File(result.files.single.path!);
 
@@ -112,8 +134,39 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
     }
   }
 
+  void myDialog(context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog.fullscreen(
+          backgroundColor: Colors.blue.withOpacity(0.2),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                  style: TextStyle(color: Colors.white),
+                  "동영상 선택 : 사용자 폴더에서 동영상 선택\n\n동영상 내려받기 : 사용자 폴더안에있는SSC/assets에 저장됩니다. \nEx) C:/Users/anyang/Desktop/project/assets \n\n저장된 비디오 보기 : assets폴더에있는 비디오를 선택"),
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                icon: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -136,49 +189,116 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                 child: Container(
+                  color: Colors.black.withOpacity(0.5),
                   width: 1100,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      image: DecorationImage(
-                          image: AssetImage(
-                              'assets/image/microdust_inform_background_black.jpg'),
-                          fit: BoxFit.cover,
-                          opacity: 150)),
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Text(
-                          "Video Detection",
-                          style: TextStyle(color: Colors.white),
+                        IconButton(
+                          onPressed: () {
+                            myDialog(context);
+                          },
+                          icon: const Icon(
+                            Icons.question_mark,
+                            color: Colors.white,
+                          ),
+                        ),
+                        if (isLoading) CircularProgressIndicator(),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Text(resultMessage),
+                        SizedBox(
+                          height: 5,
                         ),
                         _selectedVideo != null
-                            ? Container(
-                                constraints: BoxConstraints(
-                                  maxWidth: 1000, // 원하는 최대 너비 설정
-                                  maxHeight: 700, // 원하는 최대 높이 설정
-                                ),
-                                child: VideoPlayer(_videoPlayerController),
-                              )
-                            : Text('No video selected'),
+                            ? Stack(children: [
+                                VideoPlayer(_videoPlayerController),
+                                Positioned(
+                                    bottom: 0,
+                                    child: Column(children: [
+                                      ValueListenableBuilder(
+                                        valueListenable: _videoPlayerController,
+                                        builder: ((context, value, child) {
+                                          int minute = _videoPlayerController
+                                              .value.position.inMinutes;
+                                          int second = _videoPlayerController
+                                                  .value.position.inSeconds %
+                                              60;
+                                          return Text("$minute:$second",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headline6!
+                                                  .copyWith(
+                                                      color: Colors.white,
+                                                      backgroundColor:
+                                                          Colors.black54));
+                                        }),
+                                      ),
+                                      SizedBox(height: 10),
+                                      ElevatedButton(
+                                          style: ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStateProperty.all(
+                                                      Colors.black
+                                                          .withOpacity(0.5))),
+                                          onPressed: () =>
+                                              _videoPlayerController.play(),
+                                          child: const Text(
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                              "Play")),
+                                      SizedBox(height: 10),
+                                      ElevatedButton(
+                                          style: ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStateProperty.all(
+                                                      Colors.black
+                                                          .withOpacity(0.5))),
+                                          onPressed: () =>
+                                              _videoPlayerController.pause(),
+                                          child: const Text(
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                              "Pause")),
+                                    ])),
+                              ])
+                            : Text(
+                                style: TextStyle(color: Colors.white),
+                                'No video selected'),
                         SizedBox(height: 20),
                         ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  Colors.black.withOpacity(0.5))),
                           onPressed: () async {
                             File? videoFile = await _pickVideo();
                             if (videoFile != null) {
                               await _uploadVideo(videoFile);
                             }
                           },
-                          child: Text('동영상 선택 및 업로드'),
+                          child: Text(
+                              style: TextStyle(color: Colors.white), '동영상 선택'),
                         ),
                         SizedBox(height: 20),
                         ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  Colors.black.withOpacity(0.5))),
                           onPressed: _getProcessedVideo,
-                          child: Text('AI DETECTION START '),
+                          child: Text(
+                              style: TextStyle(color: Colors.white),
+                              ' 동영상 내려받기 '),
                         ),
                         SizedBox(height: 20),
                         ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  Colors.black.withOpacity(0.5))),
                           onPressed: _pickAndPlayVideo,
-                          child: Text('저장된 비디오 보기'),
+                          child: Text(
+                              style: TextStyle(color: Colors.white),
+                              '저장된 비디오 보기'),
                         ),
                       ]),
                 ),
@@ -189,15 +309,8 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                       left: 8, right: 8, bottom: 8, top: 16),
                   children: <Widget>[
                     Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        image: DecorationImage(
-                            image: AssetImage(
-                                'assets/image/microdust_inform_background_black.jpg'),
-                            fit: BoxFit.cover,
-                            opacity: 150.0),
-                      ),
-                      height: 950,
+                      color: Colors.black.withOpacity(0.5),
+                      height: 960,
                       child: Column(
                         children: [
                           Container(
@@ -210,13 +323,31 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Video Detection",
+                                    "감지 내역",
                                     style: TextStyle(color: Colors.white),
                                   )
                                 ]),
                           ),
                           // 이 부분을 기점으로 감지내역의 데이터를 넣을 리스트뷰를 넣어야한다. Container() 안에,
-                          Container(),
+                          Container(
+                            constraints: BoxConstraints(maxHeight: 900),
+                            child: ListView.builder(
+                                controller: _scrollController,
+                                itemCount: resultList.length,
+                                itemBuilder: (context, index) {
+                                  List<String> splitValues =
+                                      resultList[index].split('},');
+
+                                  String formattedString =
+                                      splitValues.join('}\n\n');
+                                  return ListTile(
+                                    title: Text(
+                                      formattedString,
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  );
+                                }),
+                          ),
                         ],
                       ),
                     ),
@@ -236,5 +367,6 @@ class _MyDesktopBodyState extends State<MyDesktopBody> {
   @override
   void dispose() {
     super.dispose();
+    _videoPlayerController.dispose();
   }
 }
